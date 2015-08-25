@@ -8,7 +8,7 @@ public class Game
     public static void main(String[] args) {
         System.out.println("Hello");
 
-        JFrame window = new JFrame("Platformer");
+        JFrame window = new JFrame("BubbleShooter2D");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setContentPane(new GamePanel());
         window.pack();
