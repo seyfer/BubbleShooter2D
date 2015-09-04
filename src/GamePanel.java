@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 /**
  * Created by seyfer on 25.08.15.
@@ -21,7 +22,8 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
     private int FPS = 30;
     private double averageFPS;
 
-    private Player player;
+    public static Player player;
+    public static ArrayList<Bullet> bullets;
 
     public GamePanel() {
         super();
@@ -49,6 +51,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
         g = (Graphics2D) image.getGraphics();
 
         player = new Player();
+        bullets = new ArrayList<Bullet>();
 
         long startTime;
         long URDTimeMillis;
@@ -92,7 +95,16 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
     }
 
     private void gameUpdate() {
+
         player.update();
+
+        for (int i = 0; i < bullets.size(); i++) {
+            boolean remove = bullets.get(i).update();
+            if (remove) {
+                bullets.remove(i);
+                i--;
+            }
+        }
     }
 
     private void gameRender() {
@@ -101,8 +113,13 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
 
         g.setColor(Color.BLACK);
         g.drawString("FPS " + averageFPS, 10, 10);
+        g.drawString("num bullets: " + bullets.size(), 10, 20);
 
         player.draw(g);
+
+        for (int i = 0; i < bullets.size(); i++) {
+            bullets.get(i).draw(g);
+        }
     }
 
     private void gameDraw() {
@@ -131,6 +148,9 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
         if (keyCode == KeyEvent.VK_DOWN) {
             player.setDown(true);
         }
+        if (keyCode == KeyEvent.VK_SPACE) {
+            player.setFiring(true);
+        }
     }
 
     @Override
@@ -147,6 +167,9 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
         }
         if (keyCode == KeyEvent.VK_DOWN) {
             player.setDown(false);
+        }
+        if (keyCode == KeyEvent.VK_SPACE) {
+            player.setFiring(false);
         }
     }
 }
