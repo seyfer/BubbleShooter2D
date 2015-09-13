@@ -121,4 +121,12 @@ public class Enemy
         this.r = r;
         return this;
     }
+
+    public int getType() {
+        return type;
+    }
+
+    public int getRank() {
+        return rank;
+    }
 }

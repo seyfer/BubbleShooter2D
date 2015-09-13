@@ -155,7 +155,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
             enemies.get(i).update();
         }
 
-        //bullet-enemy
+        //bullet-enemy collision
         for (int i = 0; i < bullets.size(); i++) {
             Bullet b = bullets.get(i);
             double bx = b.getX();
@@ -182,11 +182,38 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
             }
         }
 
+        //dead enemies
         for (int i = 0; i < enemies.size(); i++) {
             if (enemies.get(i).isDead()) {
+                Enemy e = enemies.get(i);
+                player.addScore(e.getType() + e.getRank());
                 enemies.remove(i);
                 i--;
             }
+        }
+
+        //player-enemy collisison
+        if (!player.isRecovering()) {
+            int px = player.getX();
+            int py = player.getY();
+            int pr = player.getR();
+
+            for (int i = 0; i < enemies.size(); i++) {
+                Enemy e = enemies.get(i);
+
+                double ex = e.getX();
+                double ey = e.getY();
+                double er = e.getR();
+
+                double dx = px - ex;
+                double dy = py - ey;
+                double dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < pr + er) {
+                    player.loseLife();
+                }
+            }
+
         }
     }
 
@@ -230,6 +257,11 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
             g.drawOval(20 + (20 * i), 20, player.getR() * 2, player.getR() * 2);
             g.setStroke(new BasicStroke(1));
         }
+
+        //draw player score
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Century Gothic", Font.PLAIN, 14));
+        g.drawString("Score: " + player.getScore(), WIDTH - 100, 30);
     }
 
     private void gameDraw() {

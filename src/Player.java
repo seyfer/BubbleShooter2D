@@ -22,9 +22,14 @@ public class Player
     private long firingTimer;
     private long firingDelay;
 
+    private boolean recovering;
+    private long recoveryTimer;
+
     private int lives;
     private Color color1;
     private Color color2;
+
+    private int score;
 
     public Player() {
         x = GamePanel.WIDTH / 2;
@@ -42,6 +47,11 @@ public class Player
         firing = false;
         firingTimer = System.nanoTime();
         firingDelay = 200;
+
+        recovering = false;
+        recoveryTimer = 0;
+
+        score = 0;
     }
 
     public void update() {
@@ -78,18 +88,39 @@ public class Player
                 firingTimer = System.nanoTime();
             }
         }
+
+        long elapsed = (System.nanoTime() - recoveryTimer) / 1000000;
+        if (elapsed > 2000) {
+            recovering = false;
+            recoveryTimer = 0;
+        }
     }
 
     public void draw(Graphics2D g) {
 
-        g.setColor(color1);
-        g.fillOval(x - r, y - r, r * 2, r * 2);
+        if (recovering) {
+            g.setColor(color2);
+            g.fillOval(x - r, y - r, r * 2, r * 2);
 
-        g.setStroke(new BasicStroke(3));
-        g.setColor(color1.darker());
-        g.drawOval(x - r, y - r, r * 2, r * 2);
-        g.setStroke(new BasicStroke(1));
+            g.setStroke(new BasicStroke(3));
+            g.setColor(color2.darker());
+            g.drawOval(x - r, y - r, r * 2, r * 2);
+            g.setStroke(new BasicStroke(1));
+        } else {
+            g.setColor(color1);
+            g.fillOval(x - r, y - r, r * 2, r * 2);
 
+            g.setStroke(new BasicStroke(3));
+            g.setColor(color1.darker());
+            g.drawOval(x - r, y - r, r * 2, r * 2);
+            g.setStroke(new BasicStroke(1));
+        }
+    }
+
+    public void loseLife() {
+        lives--;
+        recovering = true;
+        recoveryTimer = System.nanoTime();
     }
 
     public Player setLeft(boolean left) {
@@ -135,5 +166,22 @@ public class Player
 
     public int getR() {
         return r;
+    }
+
+    public boolean isRecovering() {
+        return recovering;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public Player setScore(int score) {
+        this.score = score;
+        return this;
+    }
+
+    public void addScore(int i) {
+        score += i;
     }
 }

@@ -22,7 +22,7 @@ public class Bullet
 
         r = 2;
         rad = Math.toRadians(angle);
-        speed = 15;
+        speed = 10;
         dx = Math.cos(rad) * speed;
         dy = Math.sin(rad) * speed;
 
