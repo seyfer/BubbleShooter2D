@@ -25,6 +25,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
     public static Player player;
     public static ArrayList<Bullet> bullets;
     public static ArrayList<Enemy> enemies;
+    public static ArrayList<PowerUp> powerUps;
 
     private long waveStartTimer;
     private long waveStartTimerDiff;
@@ -68,6 +69,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
         player = new Player();
         bullets = new ArrayList<Bullet>();
         enemies = new ArrayList<Enemy>();
+        powerUps = new ArrayList<PowerUp>();
 
         //old
 //        for (int i = 0; i < 5; i++) {
@@ -143,6 +145,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
 
         player.update();
 
+        //bullet update
         for (int i = 0; i < bullets.size(); i++) {
             boolean remove = bullets.get(i).update();
             if (remove) {
@@ -151,8 +154,18 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
             }
         }
 
+        //enemy update
         for (int i = 0; i < enemies.size(); i++) {
             enemies.get(i).update();
+        }
+
+        //powerup update
+        for (int i = 0; i < powerUps.size(); i++) {
+            boolean remove = powerUps.get(i).update();
+            if (remove) {
+                powerUps.remove(i);
+                i--;
+            }
         }
 
         //bullet-enemy collision
@@ -182,13 +195,27 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
             }
         }
 
-        //dead enemies
+        //check dead enemies
         for (int i = 0; i < enemies.size(); i++) {
+
             if (enemies.get(i).isDead()) {
+
                 Enemy e = enemies.get(i);
+
+                //chance for powerup
+                double rand = Math.random();
+                if (rand < 0.001) {
+                    powerUps.add(new PowerUp(1, e.getX(), e.getY()));
+                } else if (rand < 0.020) {
+                    powerUps.add(new PowerUp(3, e.getX(), e.getY()));
+                } else if (rand < 0.120) {
+                    powerUps.add(new PowerUp(2, e.getX(), e.getY()));
+                }
+
                 player.addScore(e.getType() + e.getRank());
                 enemies.remove(i);
                 i--;
+
             }
         }
 
@@ -228,12 +255,19 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
 
         player.draw(g);
 
+        //draw bullets
         for (int i = 0; i < bullets.size(); i++) {
             bullets.get(i).draw(g);
         }
 
+        //draw enemies
         for (int i = 0; i < enemies.size(); i++) {
             enemies.get(i).draw(g);
+        }
+
+        //draw powerups
+        for (int i = 0; i < powerUps.size(); i++) {
+            powerUps.get(i).draw(g);
         }
 
         //draw wave number
