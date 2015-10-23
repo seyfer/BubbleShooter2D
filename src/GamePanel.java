@@ -210,12 +210,12 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
                     powerUps.add(new PowerUp(3, e.getX(), e.getY()));
                 } else if (rand < 0.120) {
                     powerUps.add(new PowerUp(2, e.getX(), e.getY()));
-                }
+                } else
+                    powerUps.add(new PowerUp(2, e.getX(), e.getY()));
 
                 player.addScore(e.getType() + e.getRank());
                 enemies.remove(i);
                 i--;
-
             }
         }
 
@@ -240,7 +240,41 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
                     player.loseLife();
                 }
             }
+        }
 
+        //player- powerup colission
+        int px = player.getX();
+        int py = player.getY();
+        int pr = player.getR();
+        for (int i = 0; i < powerUps.size(); i++) {
+            PowerUp p = powerUps.get(i);
+
+            double ex = p.getX();
+            double ey = p.getY();
+            double er = p.getR();
+
+            double dx = px - ex;
+            double dy = py - ey;
+            double dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < pr + er) {
+
+                int type = p.getType();
+
+                if (type == 1) {
+                    player.gainLife();
+                }
+                if (type == 2) {
+                    player.increasePower(1);
+                }
+                if (type == 3) {
+                    player.increasePower(2);
+                }
+
+                powerUps.remove(i);
+                i--;
+
+            }
         }
     }
 
@@ -292,6 +326,16 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
             g.setStroke(new BasicStroke(1));
         }
 
+        //draw player power
+        g.setColor(Color.YELLOW);
+        g.fillRect(20, 40, player.getPower() * 8, 8);
+        g.setColor(Color.YELLOW.darker());
+        g.setStroke(new BasicStroke(2));
+        for (int i = 0; i < player.getRequiredPower(); i++) {
+            g.drawRect(20 + 8 * i, 40, 8, 8);
+        }
+        g.setStroke(new BasicStroke(1));
+
         //draw player score
         g.setColor(Color.WHITE);
         g.setFont(new Font("Century Gothic", Font.PLAIN, 14));
@@ -316,6 +360,14 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
         if (waveNumber == 2) {
             for (int i = 0; i < 8; i++) {
                 enemies.add(new Enemy(1, 1));
+            }
+        }
+        if (waveNumber == 3) {
+            for (int i = 0; i < 4; i++) {
+                enemies.add(new Enemy(2, 1));
+            }
+            for (int i = 0; i < 4; i++) {
+                enemies.add(new Enemy(3, 1));
             }
         }
     }
