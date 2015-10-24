@@ -27,12 +27,17 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
     public static ArrayList<Enemy> enemies;
     public static ArrayList<PowerUp> powerUps;
     public static ArrayList<Explosion> explosions;
+    public static ArrayList<Text> texts;
 
     private long waveStartTimer;
     private long waveStartTimerDiff;
     private int waveNumber;
     private boolean waveStart;
     private int waveDelay = 2000;
+
+    private long slowDowmTimer;
+    private long slowDownTimerDiff;
+    private long slowDownLength = 6000;
 
     public GamePanel() {
         super();
@@ -72,6 +77,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
         enemies = new ArrayList<Enemy>();
         powerUps = new ArrayList<PowerUp>();
         explosions = new ArrayList<Explosion>();
+        texts = new ArrayList<Text>();
 
         //old
 //        for (int i = 0; i < 5; i++) {
@@ -170,6 +176,15 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
             }
         }
 
+        //text update
+        for (int i = 0; i < texts.size(); i++) {
+            boolean remove = texts.get(i).update();
+            if (remove) {
+                texts.remove(i);
+                i--;
+            }
+        }
+
         //explosion update
         for (int i = 0; i < explosions.size(); i++) {
             boolean remove = explosions.get(i).update();
@@ -221,7 +236,12 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
                     powerUps.add(new PowerUp(3, e.getX(), e.getY()));
                 } else if (rand < 0.120) {
                     powerUps.add(new PowerUp(2, e.getX(), e.getY()));
+                } else if (rand < 0.130) {
+                    powerUps.add(new PowerUp(4, e.getX(), e.getY()));
                 }
+
+                //debug
+//                else powerUps.add(new PowerUp(4, e.getX(), e.getY()));
 
                 player.addScore(e.getType() + e.getRank());
                 enemies.remove(i);
@@ -276,12 +296,22 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
 
                 if (type == 1) {
                     player.gainLife();
+                    texts.add(new Text(player.getX(), player.getY(), 2000, "Extra Life"));
                 }
                 if (type == 2) {
                     player.increasePower(1);
+                    texts.add(new Text(player.getX(), player.getY(), 2000, "Power"));
                 }
                 if (type == 3) {
                     player.increasePower(2);
+                    texts.add(new Text(player.getX(), player.getY(), 2000, "Double Power"));
+                }
+                if (type == 4) {
+                    slowDowmTimer = System.nanoTime();
+                    for (int j = 0; j < enemies.size(); j++) {
+                        enemies.get(j).setSlow(true);
+                    }
+                    texts.add(new Text(player.getX(), player.getY(), 2000, "Slow Down"));
                 }
 
                 powerUps.remove(i);
@@ -289,17 +319,36 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
 
             }
         }
+
+        //slowdown update
+        if (slowDowmTimer != 0) {
+            slowDownTimerDiff = (System.nanoTime() - slowDowmTimer) / 1000000;
+            if (slowDownTimerDiff > slowDownLength) {
+                slowDowmTimer = 0;
+                for (int j = 0; j < enemies.size(); j++) {
+                    enemies.get(j).setSlow(false);
+                }
+            }
+        }
     }
 
     private void gameRender() {
+        //draw background
         g.setColor(new Color(0, 100, 255));
         g.fillRect(0, 0, WIDTH, HEIGHT);
+
+        //draw slowdown screen
+        if (slowDowmTimer != 0) {
+            g.setColor(new Color(255, 255, 255, 64));
+            g.fillRect(0, 0, WIDTH, HEIGHT);
+        }
 
         //debug
 //        g.setColor(Color.BLACK);
 //        g.drawString("FPS " + averageFPS, 10, 10);
 //        g.drawString("num bullets: " + bullets.size(), 10, 20);
 
+        //draw player
         player.draw(g);
 
         //draw bullets
@@ -317,8 +366,14 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
             powerUps.get(i).draw(g);
         }
 
+        //draw explosions
         for (int i = 0; i < explosions.size(); i++) {
             explosions.get(i).draw(g);
+        }
+
+        //text update
+        for (int i = 0; i < texts.size(); i++) {
+            texts.get(i).draw(g);
         }
 
         //draw wave number
@@ -357,6 +412,13 @@ public class GamePanel extends JPanel implements Runnable, KeyListener
         g.setColor(Color.WHITE);
         g.setFont(new Font("Century Gothic", Font.PLAIN, 14));
         g.drawString("Score: " + player.getScore(), WIDTH - 100, 30);
+
+        //draw slowdown meter
+        if (slowDowmTimer != 0) {
+            g.setColor(Color.WHITE);
+            g.drawRect(20, 60, 100, 8);
+            g.fillRect(20, 60, (int) (100 - 100.0 * slowDownTimerDiff / slowDownLength), 8);
+        }
     }
 
     private void gameDraw() {

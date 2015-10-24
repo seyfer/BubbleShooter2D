@@ -26,6 +26,8 @@ public class Enemy
     private boolean hit;
     private long hitTimer;
 
+    boolean slow;
+
     public Enemy(int type, int rank) {
         this.type = type;
         this.rank = rank;
@@ -175,8 +177,14 @@ public class Enemy
     }
 
     public void update() {
-        x += dx;
-        y += dy;
+
+        if (slow) {
+            x += dx * 0.3;
+            y += dy * 0.3;
+        } else {
+            x += dx;
+            y += dy;
+        }
 
         //on board
         if (!ready) {
@@ -260,5 +268,10 @@ public class Enemy
 
     public int getRank() {
         return rank;
+    }
+
+    public Enemy setSlow(boolean slow) {
+        this.slow = slow;
+        return this;
     }
 }
